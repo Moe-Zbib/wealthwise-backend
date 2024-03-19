@@ -12,7 +12,8 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const user = { name: req.body.name, password: req.body.password };
-  console.log(user);
+  const { email, password } = req.body;
+  authService.register(email, password);
+
   res.status(201).send();
 };
