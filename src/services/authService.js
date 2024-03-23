@@ -1,31 +1,17 @@
 const { hashData } = require("./encryptionService");
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const validateCredentials = (email, data) => {
-  if (!email || !data) {
-    throw new Error("Email and data are required");
-  }
-
-  if (!emailRegex.test(email)) {
-    throw new Error("Invalid email format");
-  }
-
-  if (data.length < 8) {
-    throw new Error("Data must be at least 8 characters");
-  }
-};
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const fsPromises = require("fs").promises;
+const path = require("path");
+const User = require("../models/users.model");
 
 exports.login = async (email, data, pepper) => {
-  validateCredentials(email, data);
-
   console.log(email);
 };
 
-exports.register = async (email, data) => {
-  validateCredentials(email, data);
-  console.log(email, data);
+exports.register = async (email, password) => {
+  const { hashedData, pepper } = await hashData(password);
 
-  const { hashedData, pepper } = await hashData(data);
-  console.log(hashedData);
+  const user = await User.create({ email, password });
+  console.log("Created", user);
 };
