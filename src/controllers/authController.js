@@ -12,12 +12,18 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password } = req.body;
+  const registrationData = req.body;
   try {
-    await authService.register(email, password);
-    res.status(201).send();
+    const user = await authService.register(registrationData);
+    res.status(201).json({ message: "Registered", user });
   } catch (error) {
     console.error("Registration error:", error);
+
+    if (error.username || error.email) {
+      res.status(400).json({ error });
+      return;
+    }
+
     res.status(400).json({ error: error.message });
   }
 };

@@ -1,10 +1,19 @@
+// users.model.js
 const mongoose = require("mongoose");
 
 const UserSchema = mongoose.Schema(
   {
+    firstname: {
+      type: String,
+      unique: false,
+    },
+    lastname: {
+      type: String,
+      unique: false,
+    },
     username: {
       type: String,
-      required: false,
+      required: true,
       unique: true,
     },
     email: {
@@ -14,6 +23,8 @@ const UserSchema = mongoose.Schema(
     },
     password: {
       type: String,
+      required: true,
+      unique: false,
     },
   },
   { timestamps: true }

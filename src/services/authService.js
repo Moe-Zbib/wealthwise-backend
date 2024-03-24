@@ -9,9 +9,32 @@ exports.login = async (email, data, pepper) => {
   console.log(email);
 };
 
-exports.register = async (email, password) => {
-  const { hashedData, pepper } = await hashData(password);
+exports.register = async (registrationData) => {
+  const { firstname, lastname, username, email, password } = registrationData;
 
-  const user = await User.create({ email, password });
-  console.log("Created", user);
+  try {
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      const error = {};
+      if (existingUser.username === username) {
+        error.username = "Username already exists";
+      }
+      if (existingUser.email === email) {
+        error.email = "Email already exists";
+      }
+      throw error;
+    }
+
+    const { hashedData } = await hashData(password);
+    const user = await User.create({
+      firstname,
+      lastname,
+      username,
+      email,
+      password: hashedData,
+    });
+    return user;
+  } catch (e) {
+    throw e;
+  }
 };
