@@ -1,29 +1,34 @@
 const authService = require("../services/authService");
+const User = require("../models/users.model");
+const handleValidationError = require("../middleware/auth/errorHandler");
+const errorHandler = require("../middleware/auth/errorHandler");
+const { tryCatch } = require("../utils/tryCatch");
 
-exports.login = async (req, res) => {
+exports.login = tryCatch(async (req, res, next) => {
   const { email, password } = req.body;
-  try {
-    const token = await authService.login(email, password);
-    res.status(200).json({ token });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(400).json({ error: error.message });
+
+  const existingUser = await User.findOne({ $or: [{ email }] });
+  if (!existingUser) {
+    throw new Error("Email or password are incorrect!");
   }
-};
 
-exports.register = async (req, res) => {
-  const registrationData = req.body;
-  try {
-    const user = await authService.register(registrationData);
-    res.status(201).json({ message: "Registered", user });
-  } catch (error) {
-    console.error("Registration error:", error);
+  const token = await authService.login(email, password);
+  res.status(200).json({ token });
+});
 
-    if (error.username || error.email) {
-      res.status(400).json({ error });
-      return;
-    }
+exports.register = tryCatch(async (req, res) => {
+  const { username, email } = req.body;
+  const existingEmail = await User.findOne({ $or: [{ username }] });
+  const user = await authService.register(req.body);
+  res.status(201).json({ message: "Registered successfully", user });
+});
 
-    res.status(400).json({ error: error.message });
-  }
-};
+// exports.checkEmail = async (req, res) => {
+//   try {
+//     const email = req.params.email;
+//     const user = await User.findOne({ email });
+//     res.json({ exists: !!user });
+//   } catch (e) {
+//     res.status(500).json({ error: "Unexpected Error" });
+//   }
+// };

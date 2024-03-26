@@ -10,31 +10,23 @@ exports.login = async (email, data, pepper) => {
 };
 
 exports.register = async (registrationData) => {
-  const { firstname, lastname, username, email, password } = registrationData;
-
-  try {
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-    if (existingUser) {
-      const error = {};
-      if (existingUser.username === username) {
-        error.username = "Username already exists";
-      }
-      if (existingUser.email === email) {
-        error.email = "Email already exists";
-      }
-      throw error;
-    }
-
-    const { hashedData } = await hashData(password);
-    const user = await User.create({
-      firstname,
-      lastname,
-      username,
-      email,
-      password: hashedData,
-    });
-    return user;
-  } catch (e) {
-    throw e;
+  console.log(" the data being passed:", registrationData);
+  const { name, lastName, username, email, password } = registrationData;
+  const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+  if (existingUser) {
+    const field = existingUser.username === username ? "username" : "email";
+    throw new Error(`${field} already exists.`);
   }
+
+  const { hashedData } = await hashData(password);
+  const user = await User.create({
+    username,
+    email,
+    password: hashedData,
+    firstname: name,
+    lastname: lastName,
+  });
+
+  console.log("added to database!");
+  return user;
 };

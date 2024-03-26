@@ -4,11 +4,12 @@ const bodyParser = require("body-parser");
 const app = express();
 const router = require("./src/routes/index");
 const mongoose = require("mongoose");
+const errorHandler = require("./src/middleware/auth/errorHandler");
 
 app.use(bodyParser.json());
 app.use(cors());
 app.use("/", router);
-
+app.use(errorHandler);
 const port = process.env.PORT || 3000;
 
 mongoose

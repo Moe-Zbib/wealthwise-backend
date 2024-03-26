@@ -2,10 +2,10 @@
 Content-Type: application/json
 
 {
-    "firstname": "tesaassting", 
-    "lastname":"lasttesaft",
-    "username" :"fsas",
-    "email":"afafasfadfadf4@1.com",
+    "name":" myname",
+    "lastName": " afaga",
+    "username" : " agaga" ,
+    "email":"afafadfadf4@1.com",
     "password":"pasordfafa"
 
 }                   
