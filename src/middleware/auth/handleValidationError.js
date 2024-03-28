@@ -1,23 +1,37 @@
-const handleValidationError = (req, res, next) => {
-  const { email, password } = req.body;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  console.log(email, password);
+const validateRegistration = (req, res, next) => {
+  const { username, email, password, firstName, lastName } = req.body;
+  const errors = {};
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and data are required." });
-  }
+  if (!username || username.trim() === "")
+    errors.username = "Username is required";
+  if (!email || email.trim() === "") errors.email = "Email is required";
+  if (!password || password.trim() === "")
+    errors.password = "Password is required";
+  if (!firstName || firstName.trim() === "")
+    errors.firstName = "First name is required";
+  if (!lastName || lastName.trim() === "")
+    errors.lastName = "Last name is required";
 
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ error: "Invalid email format." });
-  }
-
-  if (password.length < 8) {
-    return res
-      .status(400)
-      .json({ error: "Data must be at least 8 characters long." });
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors });
   }
 
   next();
 };
 
-module.exports = { handleValidationError };
+const validateLogin = (req, res, next) => {
+  const { email, password } = req.body;
+  const errors = {};
+
+  if (!email || email.trim() === "") errors.email = "Email is required";
+  if (!password || password.trim() === "")
+    errors.password = "Password is required";
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  next();
+};
+
+module.exports = { validateLogin, validateRegistration };

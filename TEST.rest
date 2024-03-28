@@ -1,11 +1,11 @@
-    POST http://localhost:3000/auth/register
+    POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-    "name":" myname",
-    "lastName": " afaga",
-    "username" : " agaga" ,
-    "email":"afafadfadf4@1.com",
-    "password":"pasordfafa"
+    # "firstName":"asf",
+    # "lastName": "FA",
+    # "username" : " tss" ,
+    "email":"afafadfafaasfdasc@a.om",
+    "password":"agaga@paZA12"
 
-}                   
+}                       

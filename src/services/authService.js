@@ -4,29 +4,28 @@ require("dotenv").config();
 const fsPromises = require("fs").promises;
 const path = require("path");
 const User = require("../models/users.model");
+const bcrypt = require("bcrypt");
 
-exports.login = async (email, data, pepper) => {
-  console.log(email);
+exports.verifyPassword = async (enteredPassword, userPassword) => {
+  return bcrypt.compare(enteredPassword, userPassword);
+};
+
+exports.generateToken = async (userId) => {
+  return jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "1h",
+  });
 };
 
 exports.register = async (registrationData) => {
-  console.log(" the data being passed:", registrationData);
-  const { name, lastName, username, email, password } = registrationData;
-  const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-  if (existingUser) {
-    const field = existingUser.username === username ? "username" : "email";
-    throw new Error(`${field} already exists.`);
-  }
+  const { firstName, lastName, username, email, password } = registrationData;
 
-  const { hashedData } = await hashData(password);
+  const hashedPassword = await bcrypt.hash(password, 12);
   const user = await User.create({
+    firstName,
+    lastName,
     username,
     email,
-    password: hashedData,
-    firstname: name,
-    lastname: lastName,
+    password: hashedPassword,
   });
-
-  console.log("added to database!");
   return user;
 };
