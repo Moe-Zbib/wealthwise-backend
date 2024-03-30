@@ -1,7 +1,5 @@
 const authService = require("../services/authService");
 const User = require("../db/models/users.model");
-const handleValidationError = require("../middleware/auth/errorHandler");
-const errorHandler = require("../middleware/auth/errorHandler");
 const { tryCatch } = require("../utils/tryCatch");
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -9,9 +7,7 @@ const { tryCatch } = require("../utils/tryCatch");
 exports.login = tryCatch(async (req, res, next) => {
   const { email, password } = req.body;
 
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  const existingUser = await User.findOne({ email });
+  const existingUser = await User.findOne({ where: { email } });
   if (
     !existingUser ||
     !(await authService.verifyPassword(password, existingUser.password))
@@ -29,8 +25,8 @@ exports.register = tryCatch(async (req, res) => {
   const { email, username } = req.body;
   const errors = {};
 
-  const existingEmail = await User.findOne({ email });
-  const existingUsername = await User.findOne({ username });
+  const existingEmail = await User.findOne({ where: { email } });
+  const existingUsername = await User.findOne({ where: { username } });
 
   if (existingEmail) errors.email = "Email already exists";
   if (existingUsername) errors.username = "Username already exists";
