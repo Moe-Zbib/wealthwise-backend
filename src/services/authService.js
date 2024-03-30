@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const fsPromises = require("fs").promises;
 const path = require("path");
-const User = require("../models/users.model");
+const User = require("../db/models/users.model");
 const bcrypt = require("bcrypt");
 
 exports.verifyPassword = async (enteredPassword, userPassword) => {
@@ -26,4 +26,18 @@ exports.register = async (registrationData) => {
     password: hashedPassword,
   });
   return user;
+};
+
+exports.handleForgotPassword = async (email, host) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error("USer not Found");
+  }
+
+  const token = tokenService.generateToken();
+  user.resetPasswordToken = token;
+  user.resetPassword = Date.now() + 3600000;
+  await user.save();
+
+  await emailService;
 };
