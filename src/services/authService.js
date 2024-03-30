@@ -17,12 +17,10 @@ exports.generateToken = async (userId) => {
 };
 
 exports.register = async (registrationData) => {
-  const { firstName, lastName, username, email, password } = registrationData;
+  const { username, email, password } = registrationData;
 
   const hashedPassword = await bcrypt.hash(password, 12);
   const user = await User.create({
-    firstName,
-    lastName,
     username,
     email,
     password: hashedPassword,

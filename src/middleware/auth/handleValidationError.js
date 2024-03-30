@@ -7,10 +7,6 @@ const validateRegistration = (req, res, next) => {
   if (!email || email.trim() === "") errors.email = "Email is required";
   if (!password || password.trim() === "")
     errors.password = "Password is required";
-  if (!firstName || firstName.trim() === "")
-    errors.firstName = "First name is required";
-  if (!lastName || lastName.trim() === "")
-    errors.lastName = "Last name is required";
 
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ errors });
