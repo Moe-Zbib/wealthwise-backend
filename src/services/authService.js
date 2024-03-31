@@ -28,16 +28,9 @@ exports.register = async (registrationData) => {
   return user;
 };
 
-exports.handleForgotPassword = async (email, host) => {
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw new Error("USer not Found");
-  }
-
-  const token = tokenService.generateToken();
-  user.resetPasswordToken = token;
-  user.resetPassword = Date.now() + 3600000;
-  await user.save();
-
-  await emailService;
+exports.generatePasswordResetToken = (userId) => {
+  const token = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "1hr",
+  });
+  return token;
 };

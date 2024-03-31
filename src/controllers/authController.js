@@ -38,16 +38,33 @@ exports.register = tryCatch(async (req, res) => {
   res.status(201).json({ message: "User Registered", user });
 });
 
-/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
-exports.forgotPassword = async (req, res) => {
-  await authService.handleForgotPassword(req.body.email, req.header.host);
-  res
-    .status(200)
-    .json({ message: "A link has been sent to your email address." });
-};
+exports.forgotPassword = tryCatch(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return res.status(404).json({ error: " User not found!" });
+  }
 
-exports.resetPassword = async (req, res) => {
-  await authService.handleResetPassword(req.params.token, req.body.password);
-  res.status(200).json({ message: "Password had been successfully reset." });
-};
+  const token = await authService.generatePasswordResetToken(user.id);
+  res.status(200).json({ message: "Password reset email sent ", token });
+});
+
+exports.resetPassword = tryCatch(async (req, res) => {
+  const { token, newPassword } = req.body;
+  const userId = await authService.verifyPasswordResetToken(token);
+  if (!userId) {
+    return res.status(400).json({ error: "  Invalid or expired token!" });
+  }
+
+  const user = await User.findOne({ where: { _id: userId } });
+  if (!user) {
+    return res.status(404).json({ error: "User not found!" });
+  }
+
+  const hashedPassword = await authService.hashedPassword(newPassword);
+  await user.update({ password: hashedPassword });
+
+  res.status(200).json({ message: " Password has been reset." });
+});
