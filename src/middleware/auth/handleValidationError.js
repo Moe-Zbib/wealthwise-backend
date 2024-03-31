@@ -35,4 +35,23 @@ const validateLogin = (req, res, next) => {
   next();
 };
 
-module.exports = { validateLogin, validateRegistration };
+const validateForgotPassword = (req, res, next) => {
+  const { email } = req.body;
+  const errors = {};
+
+  if (!email || email.trim() === "") errors.email = "Email is required";
+
+  if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+    errors.email = "Invalid email format";
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors });
+  }
+  next();
+};
+
+module.exports = {
+  validateLogin,
+  validateRegistration,
+  validateForgotPassword,
+};

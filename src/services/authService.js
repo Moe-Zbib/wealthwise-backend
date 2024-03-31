@@ -32,5 +32,11 @@ exports.generatePasswordResetToken = (userId) => {
   const token = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: "1hr",
   });
+
   return token;
+};
+
+exports.verifyPasswordResetToken = (token) => {
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  return decoded;
 };

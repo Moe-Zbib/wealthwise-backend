@@ -1,10 +1,7 @@
-    POST http://localhost:3000/auth/register
+    POST http://localhost:3000/auth/reset-passwordeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsImlhdCI6MTcxMTg5MTU3MywiZXhwIjoxNzExODk1MTczfQ.lJHa8eBuzxMgQXQN8nah4F-v5wECaZBUcV64fA4ssM4
 Content-Type: application/json
 
-{
+{     
+   "newPassword":"asfaf681468"
  
-     "username" : "sd" ,
-    "email":"afafasssfadfasfaasfdsa.om",
-    "password":"agaga@paZA12"
-
-}                       
+}                               

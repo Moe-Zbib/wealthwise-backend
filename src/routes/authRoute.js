@@ -5,6 +5,7 @@ const rateLimit = require("../utils/rateLimit");
 const {
   validateLogin,
   validateRegistration,
+  validateForgotPassword,
 } = require("../middleware/auth/handleValidationError");
 
 router.post(
@@ -20,7 +21,11 @@ router.post(
   authController.register
 );
 
-router.post("/forgot-password", authController.forgotPassword);
+router.post(
+  "/forgot-password",
+  validateForgotPassword,
+  authController.forgotPassword
+);
 router.post("/reset-password:token", authController.resetPassword);
 
 module.exports = router;
