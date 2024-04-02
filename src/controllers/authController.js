@@ -8,16 +8,22 @@ const sendEmail = require("../utils/mailer");
 exports.login = tryCatch(async (req, res, next) => {
   const { email, password } = req.body;
 
-  const existingUser = await User.findOne({ where: { email } });
-  if (
-    !existingUser ||
-    !(await authService.verifyPassword(password, existingUser.password))
-  ) {
+  const user = await User.findOne({ where: { email } });
+  if (!user || !(await authService.verifyPassword(password, user.password))) {
     return res.status(401).json({ error: "Email or password is incorrect!" });
   }
+  const token = authService.generateToken(user);
 
-  const token = await authService.generateToken(existingUser._id);
-  res.status(200).json({ token });
+  const cookieOptions = {
+    // httpOnly: true,
+    // Removed `secure: true`
+    // `sameSite`
+    sameSite: "Lax",
+    maxAge: 24 * 60 * 60 * 1000,
+  };
+
+  res.cookie("token", token, cookieOptions);
+  res.status(200).json({ message: "Logged in successfully!" });
 });
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +42,7 @@ exports.register = tryCatch(async (req, res) => {
     return res.status(409).json({ errors });
   }
   const user = await authService.register(req.body);
+
   res.status(201).json({ message: "User Registered", user });
 });
 
@@ -135,13 +142,13 @@ exports.forgotPassword = tryCatch(async (req, res) => {
         <div class="email-content">
             <p>You are receiving this email because a password reset request was made for your account. If this was you,
                 please click on the button below to reset your password:</p>
-            <a href="${resetLink}${token}" class="reset-button">Reset Password</a>
+            <a href="${resetLink}/${token}" class="reset-button">Reset Password</a>
             <p>If you did not request a password reset, please disregard this email. Your password will remain unchanged
                 and your account secure.</p>
         </div>
         <div class="footer">
             <p>Having trouble with the button? Copy and paste the URL below into your web browser:</p>
-            <p><a href="${resetLink}${token}"> ${token}</a></p>
+            <p><a href="${resetLink}/${token}"> ${token}</a></p>
         </div>
     </div>
 </body>

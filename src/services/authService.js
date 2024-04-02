@@ -5,6 +5,7 @@ const fsPromises = require("fs").promises;
 const path = require("path");
 const User = require("../db/models/users.model");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 exports.verifyPassword = async (enteredPassword, userPassword) => {
   return bcrypt.compare(enteredPassword, userPassword);
