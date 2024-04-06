@@ -1,34 +1,22 @@
 const authService = require("../services/authService");
 const User = require("../db/models/users.model");
-const { tryCatch } = require("../utils/tryCatch");
 const sendEmail = require("../utils/mailer");
-
+const catchAsyncErrors = require("../utils/errors/asyncWrapper");
+const loginService = require("../services/authService");
 /////////////////////////////////////////////////////////////////////////////////////
 
-exports.login = tryCatch(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  const user = await User.findOne({ where: { email } });
-  if (!user || !(await authService.verifyPassword(password, user.password))) {
-    return res.status(401).json({ error: "Email or password is incorrect!" });
-  }
-  const token = authService.generateToken(user);
-
+exports.login = catchAsyncErrors(async (req, res, next) => {
+  const token = await loginService(req.body);
   const cookieOptions = {
-    // httpOnly: true,
-    // Removed `secure: true`
-    // `sameSite`
     sameSite: "Lax",
     maxAge: 24 * 60 * 60 * 1000,
   };
-
   res.cookie("token", token, cookieOptions);
   res.status(200).json({ message: "Logged in successfully!" });
 });
-
 /////////////////////////////////////////////////////////////////////////////////////
 
-exports.register = tryCatch(async (req, res) => {
+exports.register = async (req, res) => {
   const { email, username } = req.body;
   const errors = {};
 
@@ -39,16 +27,16 @@ exports.register = tryCatch(async (req, res) => {
   if (existingUsername) errors.username = "Username already exists";
 
   if (Object.keys(errors).length > 0) {
-    return res.status(409).json({ errors });
+    return res.status(409).json(errors);
   }
   const user = await authService.register(req.body);
 
   res.status(201).json({ message: "User Registered", user });
-});
+};
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-exports.forgotPassword = tryCatch(async (req, res) => {
+exports.forgotPassword = async (req, res) => {
   const { email, resetLink } = req.body;
   const user = await User.findOne({ where: { email } });
 
@@ -159,9 +147,9 @@ exports.forgotPassword = tryCatch(async (req, res) => {
   sendEmail(email, "Password Reset", htmlContent);
 
   res.status(200).json({ message: "Password reset email sent " });
-});
+};
 
-exports.resetPassword = tryCatch(async (req, res) => {
+exports.resetPassword = async (req, res) => {
   const { token } = req.params;
   const { newPassword } = req.body;
 
@@ -183,4 +171,4 @@ exports.resetPassword = tryCatch(async (req, res) => {
   // await user.update({ password: hashedPassword });
 
   res.status(200).json({ message: " Password has been reset." });
-});
+};

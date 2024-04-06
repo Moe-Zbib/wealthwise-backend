@@ -1,40 +1,48 @@
-const validateRegistration = (req, res, next) => {
-  const { username, email, password, firstName, lastName } = req.body;
-  const errors = {};
+const AppError = require("../../utils/errors/AppError");
 
-  if (!username || username.trim() === "")
-    errors.username = "Username is required";
-  if (!email || email.trim() === "") errors.email = "Email is required";
+const isEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim());
+};
 
-  if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
-    errors.email = "Invalid email format";
+const isEmpty = (field) => {
+  return !field || field.trim().length === 0;
+};
 
-  if (!password || password.trim() === "")
-    errors.password = "Password is required";
-
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ errors });
-  }
-
-  next();
+const required = () => {
+  return `This field is required.`;
 };
 
 const validateLogin = (req, res, next) => {
   const { email, password } = req.body;
   const errors = {};
 
-  if (!email || email.trim() === "") errors.email = "Email is required";
-  if (!password || password.trim() === "")
-    errors.password = "Password is required";
-  if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+  if (!isEmail(email)) {
     errors.email = "Invalid email format";
+  }
+  if (isEmpty(email)) errors.email = required();
+  if (isEmpty(password)) errors.password = required();
   if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ errors });
+    throw AppError.badRequest(errors);
   }
 
   next();
 };
 
+const validateRegistration = (req, res, next) => {
+  const { username, email, password } = req.body;
+  const errors = {};
+
+  if (!isEmail(email)) next(AppError.badRequest("LALA"));
+  if (isEmpty(username)) errors.username = required();
+  if (isEmpty(email)) errors.email = required();
+  if (isEmpty(password)) errors.password = required();
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json(errors);
+  }
+
+  next();
+};
 const validateForgotPassword = (req, res, next) => {
   const { email } = req.body;
   const errors = {};

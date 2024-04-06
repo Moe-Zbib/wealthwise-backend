@@ -10,22 +10,22 @@ const {
 
 router.post(
   "/login",
-  validateLogin,
-  rateLimit.loginRateLimiter,
+  // validateLogin,
+  // rateLimit.loginRateLimiter,
   authController.login
 );
-router.post(
-  "/register",
-  validateRegistration,
-  rateLimit.registrationRateLimiter,
-  authController.register
-);
+// router.post(
+//   "/register",
+//   validateRegistration,
+//   rateLimit.registrationRateLimiter,
+//   authController.register
+// );
 
-router.post(
-  "/forgot-password",
-  validateForgotPassword,
-  authController.forgotPassword
-);
-router.post("/reset-password:token", authController.resetPassword);
+// router.post(
+//   "/forgot-password",
+//   validateForgotPassword,
+//   authController.forgotPassword
+// );
+// router.post("/reset-password:token", authController.resetPassword);
 
 module.exports = router;
