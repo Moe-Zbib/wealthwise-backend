@@ -11,8 +11,8 @@ sequelize.sync({ force: false }).then(() => {
 sequelize
   .authenticate()
   .then(() => {
-    console.log("Connection to PostgreSQL has been established successfully.");
-  })
+  console.log("Connection to PostgreSQL has been established successfully.");
+})
   .catch((err) => {
     console.error("Unable to connect to the PostgreSQL database:", err);
   });

@@ -5,6 +5,10 @@ class UserService {
   async getUserByEmail(email) {
     return await User.findOne({ where: { email } });
   }
+
+  async getUserByUsername(username) {
+    return await User.findOne({ where: { username } });
+  }
 }
 
 module.exports = new UserService();

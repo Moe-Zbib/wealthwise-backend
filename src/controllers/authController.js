@@ -8,7 +8,7 @@ const userService = require("../services/userService");
 /////////////////////////////////////////////////////////////////////////////////////
 
 exports.login = catchAsyncErrors(async (req, res, next) => {
-  const token = await AuthService.loginService(req.body);
+  const token = await AuthService.login(req.body);
   const cookieOptions = {
     sameSite: "Lax",
     maxAge: 24 * 60 * 60 * 1000,
@@ -20,24 +20,18 @@ exports.login = catchAsyncErrors(async (req, res, next) => {
 /////////////////////////////////////////////////////////////////////////////////////
 
 exports.register = catchAsyncErrors(async (req, res) => {
-  const { email, username } = req.body;
-  const errors = {};
-
-  const existingEmail = userService.getUserByEmail(email);
-  const existingUsername = await User.findOne({ where: { username } });
-
-  if (existingEmail) errors.email = "Email already exists";
-  if (existingUsername) errors.username = "Username already exists";
-
-  if (Object.keys(errors).length > 0) {
-    return res.status(409).json(errors);
-  }
-  const user = await authService.register(req.body);
-
+  const user = await AuthService.register(req.body);
   res.status(201).json({ message: "User Registered", user });
 });
 
-//////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+exports.deleteAccount = catchAsyncErrors(async (req, res) => {
+  const user = await AuthService.delete(req.body);
+  res
+    .status(200)
+    .json({ message: "Your account had been deleted successfully" });
+});
 
 exports.forgotPassword = async (req, res) => {
   const { email, resetLink } = req.body;

@@ -4,40 +4,57 @@ const bcrypt = require("bcrypt");
 const User = require("../db/models/users.model");
 const AppError = require("../utils/errors/AppError");
 const UserService = require("./userService");
-
+const EncryptionService = require("./encryptionService");
+ 
 class AuthService {
-  async verifyPassword(enteredPassword, userPassword) {
-    return bcrypt.compare(enteredPassword, userPassword);
-  }
-
   async generateToken(userId) {
     return jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: "1h",
     });
   }
 
-  async loginService(emailData) {
+  async login(emailData) {
     const { email, password } = emailData;
-    console.log(email, password, "this are the data");
     const user = await UserService.getUserByEmail(email);
-    const passwordIsValid = await this.verifyPassword(password, user.password);
-    if (!passwordIsValid || !user) {
+    if (!user) {
       throw AppError.BadRequest("Email or password are incorrect");
     }
-    return user;
+    const passwordIsValid = await EncryptionService.verifyEncrypt(
+      password,
+      user.password
+    );
+    if (!passwordIsValid) {
+      throw AppError.BadRequest("Email or password are incorrect");
+    }
+    const token = await this.generateToken(user.id);
+    return token;
   }
 
   async register(registrationData) {
     const { username, email, password } = registrationData;
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const errors = {};
+    const existingEmail = await UserService.getUserByEmail(email);
+    const existingUsername = await UserService.getUserByUsername(username);
+    if (existingEmail) errors.email = "Email already exists";
+    if (existingUsername) errors.username = "Username already exists";
+    if (Object.keys(errors).length > 0) {
+      throw AppError.BadRequest(errors);
+    }
+    const hashedPassword = await EncryptionService.setEncrypt(password);
     const user = await User.create({
       username,
       email,
       password: hashedPassword,
     });
-    const token = await this.generateToken(user._id);
+    const token = await this.generateToken(user.id);
     return token;
   }
+
+  async delete(token)
+  {
+
+  }
+  
 
   generatePasswordResetToken(userId) {
     const token = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
