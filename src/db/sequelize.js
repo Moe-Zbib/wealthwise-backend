@@ -1,7 +1,7 @@
 const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize(
-  `postgres://default:${process.env.PG_SECRET}@ep-shy-boat-a27y4buz.eu-central-1.aws.neon.tech:5432/verceldb?sslmode=require`
+  `postgres://default:5KHAsgInZ0Et@ep-shy-boat-a27y4buz.eu-central-1.aws.neon.tech:5432/verceldb?sslmode=require`
 );
 
 sequelize.sync({ force: false }).then(() => {

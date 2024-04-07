@@ -1,67 +1,56 @@
-const { hashData } = require("./encryptionService");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const fsPromises = require("fs").promises;
-const path = require("path");
-const User = require("../db/models/users.model");
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+const User = require("../db/models/users.model");
 const AppError = require("../utils/errors/AppError");
-const { log } = require("console");
+const UserService = require("./userService");
 
-exports.verifyPassword = async (enteredPassword, userPassword) => {
-  return bcrypt.compare(enteredPassword, userPassword);
-};
-
-exports.generateToken = async (userId) => {
-  return jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1h",
-  });
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-async function loginService(username, password) {
-  // const user  await findUserByUsername(username); // Assuming this function checks the DB
-  if (true) {
-    throw AppError.BadRequest({ email: "its wrong man", passowrd: " me too" });
+class AuthService {
+  async verifyPassword(enteredPassword, userPassword) {
+    return bcrypt.compare(enteredPassword, userPassword);
   }
 
-  const passwordIsValid = await verifyPassword(password, user.password); // Verify the password
-  if (!passwordIsValid) {
-    throw new AppError("Invalid password", "authentication_error", 401);
+  async generateToken(userId) {
+    return jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "1h",
+    });
   }
 
-  // Proceed with login logic...
-  return user; // Or token, or any other relevant info
+  async loginService(emailData) {
+    const { email, password } = emailData;
+    console.log(email, password, "this are the data");
+    const user = await UserService.getUserByEmail(email);
+    const passwordIsValid = await this.verifyPassword(password, user.password);
+    if (!passwordIsValid || !user) {
+      throw AppError.BadRequest("Email or password are incorrect");
+    }
+    return user;
+  }
+
+  async register(registrationData) {
+    const { username, email, password } = registrationData;
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+    });
+    const token = await this.generateToken(user._id);
+    return token;
+  }
+
+  generatePasswordResetToken(userId) {
+    const token = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "1hr",
+    });
+
+    return token;
+  }
+
+  verifyPasswordResetToken(token) {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    return decoded;
+  }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-
-exports.register = async (registrationData) => {
-  const { username, email, password } = registrationData;
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-  const user = await User.create({
-    username,
-    email,
-    password: hashedPassword,
-  });
-  const token = await this.generateToken(user);
-  return token;
-};
-
-exports.generatePasswordResetToken = (userId) => {
-  const token = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1hr",
-  });
-
-  return token;
-};
-
-exports.verifyPasswordResetToken = (token) => {
-  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-  return decoded;
-};
-
-module.exports = loginService;
+module.exports = new AuthService();

@@ -1,12 +1,14 @@
-const authService = require("../services/authService");
 const User = require("../db/models/users.model");
 const sendEmail = require("../utils/mailer");
 const catchAsyncErrors = require("../utils/errors/asyncWrapper");
 const loginService = require("../services/authService");
+const AuthService = require("../services/authService");
+const userService = require("../services/userService");
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 exports.login = catchAsyncErrors(async (req, res, next) => {
-  const token = await loginService(req.body);
+  const token = await AuthService.loginService(req.body);
   const cookieOptions = {
     sameSite: "Lax",
     maxAge: 24 * 60 * 60 * 1000,
@@ -14,13 +16,14 @@ exports.login = catchAsyncErrors(async (req, res, next) => {
   res.cookie("token", token, cookieOptions);
   res.status(200).json({ message: "Logged in successfully!" });
 });
+
 /////////////////////////////////////////////////////////////////////////////////////
 
-exports.register = async (req, res) => {
+exports.register = catchAsyncErrors(async (req, res) => {
   const { email, username } = req.body;
   const errors = {};
 
-  const existingEmail = await User.findOne({ where: { email } });
+  const existingEmail = userService.getUserByEmail(email);
   const existingUsername = await User.findOne({ where: { username } });
 
   if (existingEmail) errors.email = "Email already exists";
@@ -32,7 +35,7 @@ exports.register = async (req, res) => {
   const user = await authService.register(req.body);
 
   res.status(201).json({ message: "User Registered", user });
-};
+});
 
 //////////////////////////////////////////////////////////////////////////////////////
 
